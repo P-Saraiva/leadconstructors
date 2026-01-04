@@ -1,0 +1,31 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #0b0f1a;
+  --text: #e6ebf5;
+  --muted: #93a4c6;
+  --primary: #3b82f6;
+}
+
+html, body, :root {
+  height: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+}
+
+.button {
+  @apply px-4 py-2 rounded-md font-medium;
+}
+
+.button-primary {
+  @apply button bg-blue-600 hover:bg-blue-500 text-white;
+}
+
+.button-secondary {
+  @apply button border border-blue-500 text-blue-200 hover:bg-blue-900/30;
+}
