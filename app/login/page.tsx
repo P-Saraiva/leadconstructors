@@ -18,15 +18,10 @@ export default function LoginPage() {
       const result = await signIn('credentials', {
         email,
         password,
-        redirect: false,
+        redirect: true,
+        callbackUrl: '/dashboard',
       })
-      if (result?.error) {
-        setError(result.error)
-        setLoading(false)
-        return
-      }
-      // Navigate manually on success to avoid redirect hang
-      window.location.href = '/dashboard'
+      // With redirect: true, NextAuth navigates and sets cookies.
     } catch (err: any) {
       setError(err?.message || 'Login failed')
       setLoading(false)
