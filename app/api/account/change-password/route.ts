@@ -1,6 +1,8 @@
 export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
 import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/db'
+import { getPrisma } from '@/lib/db'
 import { getToken } from 'next-auth/jwt'
 import { z } from 'zod'
 import * as bcrypt from 'bcryptjs'
@@ -22,6 +24,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Invalid input' }, { status: 400 })
   }
 
+  const prisma = getPrisma()
   const user = await prisma.user.findUnique({ where: { id: token.sub } })
   if (!user) {
     return NextResponse.json({ error: 'User not found' }, { status: 404 })

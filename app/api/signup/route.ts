@@ -1,5 +1,7 @@
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
 import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/db'
+import { getPrisma } from '@/lib/db'
 import * as bcrypt from 'bcryptjs'
 import { z } from 'zod'
 
@@ -17,6 +19,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Invalid data' }, { status: 400 })
     }
 
+    const prisma = getPrisma()
     const existing = await prisma.user.findUnique({ where: { email: parsed.data.email } })
     if (existing) {
       return NextResponse.json({ error: 'User already exists' }, { status: 409 })

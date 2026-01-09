@@ -1,6 +1,6 @@
 export const runtime = 'nodejs'
 import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/db'
+import { getPrisma } from '@/lib/db'
 import { getToken } from 'next-auth/jwt'
 import { z } from 'zod'
 
@@ -16,6 +16,7 @@ export async function POST(req: Request) {
   if (!parsed.success) {
     return NextResponse.json({ error: 'Invalid content' }, { status: 400 })
   }
+  const prisma = getPrisma()
   const prompt = await prisma.prompt.create({
     data: { userId: token.sub, content: parsed.data.content }
   })
