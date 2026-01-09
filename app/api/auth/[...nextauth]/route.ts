@@ -11,6 +11,7 @@ import { getPrisma } from '@/lib/db'
 function getAuthHandlers() {
   const prisma = getPrisma()
   const options = {
+    trustHost: true,
     adapter: PrismaAdapter(prisma),
     session: { strategy: 'jwt' as const },
     pages: { signIn: '/login' },

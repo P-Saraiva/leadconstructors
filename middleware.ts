@@ -3,8 +3,13 @@ import type { NextRequest } from 'next/server'
 import { getToken } from 'next-auth/jwt'
 
 export async function middleware(req: NextRequest) {
-  // Explicitly pass NEXTAUTH_SECRET to avoid MissingSecret in middleware
-  const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET })
+  const secret = process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET
+  let token = null
+  try {
+    token = await getToken({ req, secret })
+  } catch {
+    token = null
+  }
   const isAuthenticated = !!token
   const isDashboard = req.nextUrl.pathname.startsWith('/dashboard')
 

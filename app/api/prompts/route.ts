@@ -7,7 +7,8 @@ import { z } from 'zod'
 const schema = z.object({ content: z.string().min(1).max(4000) })
 
 export async function POST(req: Request) {
-  const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET })
+  const secret = process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET
+  const token = await getToken({ req, secret })
   if (!token?.sub) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
