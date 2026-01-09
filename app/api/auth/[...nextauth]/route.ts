@@ -16,6 +16,15 @@ function getAuthHandlers() {
     session: { strategy: 'jwt' as const },
     pages: { signIn: '/login' },
     callbacks: {
+      async redirect({ url, baseUrl }: any) {
+        try {
+          const target = new URL(url, baseUrl)
+          // Always constrain to current baseUrl origin, preserving path/search/hash
+          return `${baseUrl}${target.pathname}${target.search}${target.hash}`
+        } catch {
+          return baseUrl
+        }
+      },
       async jwt({ token, user }: any) {
         if (user) token.id = (user as any).id
         return token

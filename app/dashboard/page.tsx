@@ -61,7 +61,7 @@ export default function DashboardPage() {
             <button className="button-secondary" onClick={() => setShowChangePw(true)}>Change password</button>
           </div>
         </div>
-        <button className="button-secondary" onClick={() => signOut({ callbackUrl: '/' })}>Logout</button>
+        <button className="button-secondary" onClick={() => signOut({ callbackUrl: `${window.location.origin}/` })}>Logout</button>
       </div>
 
       <section className="space-y-4">

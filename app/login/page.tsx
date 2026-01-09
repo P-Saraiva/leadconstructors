@@ -18,10 +18,13 @@ export default function LoginPage() {
       const result = await signIn('credentials', {
         email,
         password,
-        redirect: true,
-        callbackUrl: '/dashboard',
+        redirect: false,
+        callbackUrl: `${window.location.origin}/dashboard`,
       })
-      // With redirect: true, NextAuth navigates and sets cookies.
+      if (result?.ok !== false) {
+        window.location.assign(`${window.location.origin}/dashboard`)
+        return
+      }
     } catch (err: any) {
       setError(err?.message || 'Login failed')
       setLoading(false)
@@ -65,7 +68,7 @@ export default function LoginPage() {
 
       <div className="space-y-3">
         <button
-          onClick={() => signIn('google', { callbackUrl: '/dashboard' })}
+          onClick={() => signIn('google', { callbackUrl: `${window.location.origin}/dashboard` })}
           className="button-secondary w-full"
         >
           Continue with Google
