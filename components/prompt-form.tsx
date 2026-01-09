@@ -27,7 +27,10 @@ export default function PromptForm({ inline }: { inline?: boolean }) {
     try {
       const res = await fetch('/api/prompts', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'ngrok-skip-browser-warning': '1',
+        },
         body: JSON.stringify({ content: text.trim() })
       })
       if (!res.ok) throw new Error('Failed to submit prompt')

@@ -17,7 +17,10 @@ export default function SignupPage() {
     try {
       const res = await fetch('/api/signup', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'ngrok-skip-browser-warning': '1',
+        },
         body: JSON.stringify({ email, name, password })
       })
       if (!res.ok) {

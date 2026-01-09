@@ -14,14 +14,23 @@ export default function LoginPage() {
     e.preventDefault()
     setLoading(true)
     setError(null)
-    const res = await signIn('credentials', {
-      email,
-      password,
-      redirect: true,
-      callbackUrl: '/dashboard'
-    })
-    // signIn handles redirect; errors are surfaced via URL by default
-    setLoading(false)
+    try {
+      const result = await signIn('credentials', {
+        email,
+        password,
+        redirect: false,
+      })
+      if (result?.error) {
+        setError(result.error)
+        setLoading(false)
+        return
+      }
+      // Navigate manually on success to avoid redirect hang
+      window.location.href = '/dashboard'
+    } catch (err: any) {
+      setError(err?.message || 'Login failed')
+      setLoading(false)
+    }
   }
 
   return (

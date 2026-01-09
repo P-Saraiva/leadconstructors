@@ -3,12 +3,17 @@
 import Link from 'next/link'
 import { useSession, signOut } from 'next-auth/react'
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { getMockLeads } from '@/lib/leads'
 import PromptForm from '@/components/prompt-form'
+import ChangePasswordModal from '@/components/change-password-modal'
 
 export default function DashboardPage() {
   const { data: session, status } = useSession()
+  const router = useRouter()
   const [leads, setLeads] = useState<Array<{ id: string; name: string; email: string }>>([])
+  const [hasWaited, setHasWaited] = useState(false)
+  const [showChangePw, setShowChangePw] = useState(false)
 
   useEffect(() => {
     const load = async () => {
@@ -20,7 +25,20 @@ export default function DashboardPage() {
     load()
   }, [session?.user?.email])
 
-  if (status === 'loading') {
+  // If unauthenticated, redirect to login (avoid indefinite loading)
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.replace('/login')
+    }
+  }, [status, router])
+
+  // Small timeout to avoid permanent "Loading" in edge cases
+  useEffect(() => {
+    const t = setTimeout(() => setHasWaited(true), 1500)
+    return () => clearTimeout(t)
+  }, [])
+
+  if (status === 'loading' && !hasWaited) {
     return <main className="py-24">Loading…</main>
   }
 
@@ -39,6 +57,9 @@ export default function DashboardPage() {
         <div>
           <h1 className="text-2xl font-semibold">Dashboard</h1>
           <p className="text-slate-300">{session.user.name} · {session.user.email}</p>
+          <div className="mt-2">
+            <button className="button-secondary" onClick={() => setShowChangePw(true)}>Change password</button>
+          </div>
         </div>
         <button className="button-secondary" onClick={() => signOut({ callbackUrl: '/' })}>Logout</button>
       </div>
@@ -63,6 +84,10 @@ export default function DashboardPage() {
         <h2 className="text-xl font-semibold">Share Your Prompt</h2>
         <PromptForm />
       </section>
+
+      {showChangePw && (
+        <ChangePasswordModal open={showChangePw} onClose={() => setShowChangePw(false)} />
+      )}
     </main>
   )
 }
