@@ -27,7 +27,7 @@ export default function ChangePasswordModal({ open, onClose }: { open: boolean; 
     setLoading(true)
     try {
       const res = await fetch('/api/account/change-password', {
-        method: 'POST',
+        method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
           'ngrok-skip-browser-warning': '1',
