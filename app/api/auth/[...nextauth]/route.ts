@@ -11,7 +11,7 @@ import { verifyUserCredentials } from '@/lib/credentials'
 
 const prisma = getPrisma()
 
-const config = {
+export const authOptions = {
   trustHost: true,
   adapter: PrismaAdapter(prisma),
   session: { strategy: 'jwt' },
@@ -78,4 +78,7 @@ const config = {
   ]
 } satisfies NextAuthConfig
 
-export const { GET, POST } = NextAuth(config).handlers
+const handler = NextAuth(authOptions)
+
+export const { GET, POST } = handler.handlers
+export const { auth } = handler

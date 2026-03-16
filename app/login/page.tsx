@@ -19,6 +19,7 @@ export default function LoginPage() {
       email,
       password,
       redirect: false,
+      callbackUrl: '/dashboard',
     })
 
     if (result?.error) {
@@ -27,9 +28,13 @@ export default function LoginPage() {
       return
     }
 
-    // HARD navigation after cookie commit
-    window.location.href = '/dashboard'
+    window.location.assign(result?.url ?? '/dashboard')
   }
+
+  const onGoogleLogin = () => {
+    void signIn('google', { callbackUrl: '/dashboard' })
+  }
+
   return (
     <main className="max-w-md mx-auto space-y-6">
       <div>
@@ -67,7 +72,8 @@ export default function LoginPage() {
 
       <div className="space-y-3">
         <button
-          onClick={() => signIn('google', { callbackUrl: `${window.location.origin}/dashboard` })}
+          type="button"
+          onClick={onGoogleLogin}
           className="button-secondary w-full"
         >
           Continue with Google
