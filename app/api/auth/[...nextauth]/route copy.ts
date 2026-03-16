@@ -52,45 +52,28 @@ const config = {
       },
 
       async authorize(credentials) {
-      const email =
-        typeof credentials?.email === 'string'
-          ? credentials.email
-          : undefined
+        const email =
+          typeof credentials?.email === 'string'
+            ? credentials.email
+            : undefined
 
-      const password =
-        typeof credentials?.password === 'string'
-          ? credentials.password
-          : undefined
+        const password =
+          typeof credentials?.password === 'string'
+            ? credentials.password
+            : undefined
 
-      console.log('AUTH START')
-      console.log('VERCEL REGION:', process.env.VERCEL_REGION)
-      console.log('HAS EMAIL:', !!email)
+        if (!email || !password) return null
 
-      if (!email || !password) {
-        console.log('AUTH FAIL → missing credentials')
-        return null
+        const user = await verifyUserCredentials(email, password)
+
+        if (!user) return null
+
+        return {
+          id: user.id,
+          email: user.email,
+          name: user.name
+        }
       }
-
-      const start = Date.now()
-
-      const user = await verifyUserCredentials(email, password)
-
-      const duration = Date.now() - start
-      console.log('AUTH VERIFY TIME(ms):', duration)
-
-      if (!user) {
-        console.log('AUTH FAIL → invalid user')
-        return null
-      }
-
-      console.log('AUTH SUCCESS → user id:', user.id)
-
-      return {
-        id: user.id,
-        email: user.email,
-        name: user.name
-      }
-    }
     })
   ]
 } satisfies NextAuthConfig
