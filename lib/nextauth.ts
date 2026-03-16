@@ -25,7 +25,12 @@ export const authOptions = {
     },
 
     async jwt({ token, user }) {
-      if (user) token.id = user.id
+      if (user) {
+        token.id = user.id
+        // Some downstream auth checks (e.g. getToken()) rely on `sub`.
+        // Keep it aligned with the user id to avoid false 401s.
+        if (!token.sub) token.sub = user.id
+      }
       return token
     },
 

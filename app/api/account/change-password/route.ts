@@ -4,6 +4,7 @@ export const revalidate = 0
 import { NextResponse } from 'next/server'
 import { getPrisma } from '@/lib/db'
 import { getToken } from 'next-auth/jwt'
+import { auth } from '../../../../lib/nextauth'
 import { verifyAccessToken, hasScope } from '@/lib/oauth2'
 import { z } from 'zod'
 import * as bcrypt from 'bcryptjs'
@@ -67,13 +68,21 @@ async function resolveAuth(req: Request): Promise<
     }
   }
 
-  // 2. Fall back to next-auth session JWT
+  // 2. Fall back to NextAuth session (most reliable in v5)
+  const session = await auth()
+  const sessionUserId = session?.user && 'id' in session.user ? (session.user as any).id : undefined
+  if (typeof sessionUserId === 'string' && sessionUserId.length > 0) {
+    return { userId: sessionUserId, via: 'session' }
+  }
+
+  // 3. Last-resort: parse the session JWT directly
   const secret = process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET
   const sessionToken = await getToken({ req, secret })
-  if (!sessionToken?.sub) {
+  const tokenUserId = (sessionToken as any)?.sub || (sessionToken as any)?.id
+  if (typeof tokenUserId !== 'string' || tokenUserId.length === 0) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
-  return { userId: sessionToken.sub, via: 'session' }
+  return { userId: tokenUserId, via: 'session' }
 }
 
 // ── PATCH handler (primary – used by cURL / OAuth2 and frontend) ────────
