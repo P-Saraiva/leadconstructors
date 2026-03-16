@@ -12,7 +12,6 @@ export default function DashboardPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
   const [leads, setLeads] = useState<Array<{ id: string; name: string; email: string }>>([])
-  const [hasWaited, setHasWaited] = useState(false)
   const [showChangePw, setShowChangePw] = useState(false)
 
   useEffect(() => {
@@ -27,19 +26,15 @@ export default function DashboardPage() {
 
   // If unauthenticated, redirect to login (avoid indefinite loading)
   useEffect(() => {
-    if (status === 'unauthenticated') {
+    if (status === 'loading') return
+
+    if (!session?.user) {
       router.replace('/login')
     }
-  }, [status, router])
+  }, [status, session, router])
 
-  // Small timeout to avoid permanent "Loading" in edge cases
-  useEffect(() => {
-    const t = setTimeout(() => setHasWaited(true), 1500)
-    return () => clearTimeout(t)
-  }, [])
-
-  if (status === 'loading' && !hasWaited) {
-    return <main className="py-24">Loading…</main>
+  if (status === 'loading') {
+  return <main className="py-24">Loading…</main>
   }
 
   if (!session?.user) {
