@@ -14,23 +14,22 @@ export default function LoginPage() {
     e.preventDefault()
     setLoading(true)
     setError(null)
-    try {
-      const result = await signIn('credentials', {
-        email,
-        password,
-        redirect: false,
-        callbackUrl: `${window.location.origin}/dashboard`,
-      })
-      if (result?.ok !== false) {
-        window.location.assign(`${window.location.origin}/dashboard`)
-        return
-      }
-    } catch (err: any) {
-      setError(err?.message || 'Login failed')
-      setLoading(false)
-    }
-  }
 
+    const result = await signIn('credentials', {
+      email,
+      password,
+      redirect: false,
+    })
+
+    if (result?.error) {
+      setError('Invalid email or password')
+      setLoading(false)
+      return
+    }
+
+    // HARD navigation after cookie commit
+    window.location.href = '/dashboard'
+  }
   return (
     <main className="max-w-md mx-auto space-y-6">
       <div>
