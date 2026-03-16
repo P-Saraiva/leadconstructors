@@ -1,71 +1,81 @@
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
+
 import NextAuth from 'next-auth'
 import type { NextAuthConfig } from 'next-auth'
 import Google from 'next-auth/providers/google'
 import Credentials from 'next-auth/providers/credentials'
 import { PrismaAdapter } from '@auth/prisma-adapter'
 import { getPrisma } from '@/lib/db'
+import { verifyUserCredentials } from '@/lib/credentials'
 
-// Use NextAuth v5 "handlers" API for App Router
-function getAuthHandlers() {
-  const prisma = getPrisma()
-  const options = {
-    trustHost: true,
-    adapter: PrismaAdapter(prisma),
-    session: { strategy: 'jwt' as const },
-    pages: { signIn: '/login' },
-    callbacks: {
-      async redirect({ url, baseUrl }: any) {
-        try {
-          const target = new URL(url, baseUrl)
-          // Always constrain to current baseUrl origin, preserving path/search/hash
-          return `${baseUrl}${target.pathname}${target.search}${target.hash}`
-        } catch {
-          return baseUrl
-        }
-      },
-      async jwt({ token, user }: any) {
-        if (user) token.id = (user as any).id
-        return token
-      },
-      async session({ session, token }: any) {
-        if (session.user) (session.user as any).id = token.id
-        return session
+const prisma = getPrisma()
+
+const config = {
+  trustHost: true,
+  adapter: PrismaAdapter(prisma),
+  session: { strategy: 'jwt' },
+  pages: { signIn: '/login' },
+
+  callbacks: {
+    async redirect({ url, baseUrl }) {
+      try {
+        const target = new URL(url, baseUrl)
+        return `${baseUrl}${target.pathname}${target.search}${target.hash}`
+      } catch {
+        return baseUrl
       }
     },
-    providers: [
-      Google({
-        clientId: process.env.GOOGLE_CLIENT_ID ?? '',
-        clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? '',
-      }),
-      Credentials({
-        name: 'Credentials',
-        credentials: {
-          email: { label: 'Email', type: 'email' },
-          password: { label: 'Password', type: 'password' }
-        },
-        async authorize(credentials) {
-          const email = typeof credentials?.email === 'string' ? credentials.email : undefined
-          const password = typeof credentials?.password === 'string' ? credentials.password : undefined
-          if (!email || !password) return null
-          const { verifyUserCredentials } = await import('@/lib/credentials')
-          const user = await verifyUserCredentials(email, password)
-          if (!user) return null
-          return { id: user.id, email: user.email, name: user.name }
+
+    async jwt({ token, user }) {
+      if (user) token.id = user.id
+      return token
+    },
+
+    async session({ session, token }) {
+      if (session.user) session.user.id = token.id as string
+      return session
+    }
+  },
+
+  providers: [
+    Google({
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+    }),
+
+    Credentials({
+      name: 'Credentials',
+      credentials: {
+        email: { label: 'Email', type: 'email' },
+        password: { label: 'Password', type: 'password' }
+      },
+
+      async authorize(credentials) {
+        const email =
+          typeof credentials?.email === 'string'
+            ? credentials.email
+            : undefined
+
+        const password =
+          typeof credentials?.password === 'string'
+            ? credentials.password
+            : undefined
+
+        if (!email || !password) return null
+
+        const user = await verifyUserCredentials(email, password)
+
+        if (!user) return null
+
+        return {
+          id: user.id,
+          email: user.email,
+          name: user.name
         }
-      })
-    ]
-  } satisfies NextAuthConfig
-  return NextAuth(options).handlers
-}
+      }
+    })
+  ]
+} satisfies NextAuthConfig
 
-export async function GET(req: Request, ctx: any) {
-  const { GET } = getAuthHandlers()
-  return GET(req as any)
-}
-
-export async function POST(req: Request, ctx: any) {
-  const { POST } = getAuthHandlers()
-  return POST(req as any)
-}
+export const { GET, POST } = NextAuth(config).handlers
