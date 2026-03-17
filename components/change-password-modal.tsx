@@ -90,7 +90,7 @@ export default function ChangePasswordModal({ open, onClose }: { open: boolean; 
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
-              autoComplete="new-password"
+              autoComplete="new-password2"
             />
           </div>
           <div className="flex gap-2 pt-1">
